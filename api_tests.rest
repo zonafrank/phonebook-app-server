@@ -1,0 +1,13 @@
+GET http://localhost:3003/api/persons
+
+###
+GET http://localhost:3003/api/personss
+
+###
+POST http://localhost:3003/api/persons
+Content-Type: application/json
+
+{
+    "name": "Bill Gates",
+    "number": "03-2345432"
+}
