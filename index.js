@@ -49,6 +49,8 @@ const getNextId = () => {
   return nextId;
 };
 
+app.use(express.static("build"));
+
 app.get("/info", (request, response) => {
   response.send(
     `<p>Phonebook has info for ${
