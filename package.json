@@ -9,7 +9,8 @@
     "start": "node index.js",
     "build:ui": "rm -rf build && cd ../phonebook-app && npm run build && cp build -r ../phonebook-app-server",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibiuild && git push origin master && npm run deploy",
-    "deploy": "git push heroku master"
+    "deploy": "git push heroku master",
+    "logs:prod": "heroku logs --tail"
   },
   "keywords": [],
   "author": "",
