@@ -57,7 +57,7 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", async (request, response) => {
   const { body } = request;
 
   if (!(body.name && body.number)) {
@@ -66,21 +66,13 @@ app.post("/api/persons", (request, response) => {
       .json({ error: "You must provide a name and phone number" });
   }
 
-  const nameInDb = persons.find(
-    (p) => p.name.toLowerCase() === body.name.toLowerCase()
-  );
-  if (nameInDb) {
-    return response.status(400).json({ error: "name must be unique" });
-  }
-
-  const personObject = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: getNextId(),
-  };
+  });
 
-  persons = persons.concat(personObject);
-  response.json(personObject);
+  const savedPerson = await person.save();
+  response.json(savedPerson);
 });
 
 const unknownEndpoint = (request, response) => {
