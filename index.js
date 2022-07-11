@@ -30,50 +30,95 @@ const getNextId = () => {
 
 app.use(express.static("build"));
 
-app.get("/info", (request, response) => {
-  response.send(
-    `<p>Phonebook has info for ${
-      persons.length
-    } people.</p><p>${new Date()}</p>`
-  );
-});
+app.get("/info", async (request, response, next) => {
+  try {
+    const persons = await Person.find({});
 
-app.get("/api/persons", async (request, response) => {
-  const persons = await Person.find({});
-  response.json(persons);
-});
-
-app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const personFound = persons.find((p) => p.id === id);
-  if (personFound) {
-    return response.json(personFound);
+    response.send(
+      `<p>Phonebook has info for ${
+        persons.length
+      } people.</p><p>${new Date()}</p>`
+    );
+  } catch (error) {
+    next(error);
   }
-  response.status(404).end();
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter((p) => p.id !== id);
-  response.status(204).end();
+app.get("/api/persons", async (request, response, next) => {
+  try {
+    const persons = await Person.find({});
+    response.json(persons);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/persons/:id", async (request, response, next) => {
+  try {
+    const id = request.params.id;
+    const dbResponse = await Person.findById(id);
+
+    if (dbResponse) {
+      return response.json(dbResponse);
+    }
+    response.status(404).end();
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.put("/api/persons/:id", async (request, response, next) => {
+  try {
+    const id = request.params.id;
+    const body = request.body;
+    const updatedPerson = await Person.findByIdAndUpdate(
+      id,
+      {
+        name: body.name,
+        number: body.number,
+      },
+      { new: true }
+    );
+
+    if (updatedPerson) {
+      return response.json(updatedPerson);
+    }
+    response.status(404).end();
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/persons/:id", async (request, response, next) => {
+  try {
+    const id = request.params.id;
+    await Person.findByIdAndRemove(id);
+    response.status(204).end();
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post("/api/persons", async (request, response) => {
-  const { body } = request;
+  try {
+    const { body } = request;
 
-  if (!(body.name && body.number)) {
-    return response
-      .status(400)
-      .json({ error: "You must provide a name and phone number" });
+    if (!(body.name && body.number)) {
+      return response
+        .status(400)
+        .json({ error: "You must provide a name and phone number" });
+    }
+
+    const person = new Person({
+      name: body.name,
+      number: body.number,
+    });
+
+    const savedPerson = await person.save();
+    response.json(savedPerson);
+  } catch (error) {
+    next(error);
   }
-
-  const person = new Person({
-    name: body.name,
-    number: body.number,
-  });
-
-  const savedPerson = await person.save();
-  response.json(savedPerson);
 });
 
 const unknownEndpoint = (request, response) => {
@@ -81,6 +126,14 @@ const unknownEndpoint = (request, response) => {
 };
 
 app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.log(error.message);
+  return response.status(500).end();
+  // next(error)
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

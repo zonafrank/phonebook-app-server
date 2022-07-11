@@ -4,6 +4,22 @@ GET http://localhost:3003/api/persons
 GET http://localhost:3003/api/personss
 
 ###
+GET http://localhost:3003/api/persons/62ca89b922abc7b3633874a3
+
+###
+PUT http://localhost:3003/api/persons/62ca89414465c065e2466de6
+Content-Type: application/json
+
+{
+    "name": "Steve Jobs",
+    "number": "01-2345678",
+    "id": "62ca89414465c065e2466de6"
+}
+
+###
+DELETE http://localhost:3003/api/persons/62ca89b922abc7b3633874a3
+
+###
 POST http://localhost:3003/api/persons
 Content-Type: application/json
 
