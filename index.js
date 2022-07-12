@@ -17,17 +17,6 @@ const requestLogger = (request, response, next) => {
 
 app.use(requestLogger);
 
-const getNextId = () => {
-  const currentIds = persons.map((p) => p.id);
-  let nextId;
-
-  do {
-    nextId = Math.ceil(Math.random() * 1000000);
-  } while (currentIds.includes(nextId));
-
-  return nextId;
-};
-
 app.use(express.static("build"));
 
 app.get("/info", async (request, response, next) => {

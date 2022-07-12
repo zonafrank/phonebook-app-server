@@ -10,7 +10,8 @@
     "build:ui": "rm -rf build && cd ../phonebook-app && npm run build && cp build -r ../phonebook-app-server",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibiuild && git push origin master && npm run deploy",
     "deploy": "git push heroku master",
-    "logs:prod": "heroku logs --tail"
+    "logs:prod": "heroku logs --tail",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -22,6 +23,7 @@
     "mongoose": "^6.4.4"
   },
   "devDependencies": {
+    "eslint": "^8.19.0",
     "nodemon": "^2.0.19"
   }
 }
