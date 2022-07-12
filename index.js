@@ -77,7 +77,7 @@ app.put("/api/persons/:id", async (request, response, next) => {
         name: body.name,
         number: body.number,
       },
-      { new: true }
+      { new: true, runValidators: true, context: "query" }
     );
 
     if (updatedPerson) {
@@ -99,7 +99,7 @@ app.delete("/api/persons/:id", async (request, response, next) => {
   }
 });
 
-app.post("/api/persons", async (request, response) => {
+app.post("/api/persons", async (request, response, next) => {
   try {
     const { body } = request;
 
@@ -107,6 +107,14 @@ app.post("/api/persons", async (request, response) => {
       return response
         .status(400)
         .json({ error: "You must provide a name and phone number" });
+    }
+
+    const foundPerson = await Person.find({ name: body.name });
+
+    if (foundPerson.length) {
+      return response.status(400).send({
+        error: `Name must be unique. ${body.name} already exists in the database.`,
+      });
     }
 
     const person = new Person({
@@ -129,8 +137,13 @@ app.use(unknownEndpoint);
 
 const errorHandler = (error, request, response, next) => {
   console.log(error.message);
-  return response.status(500).end();
-  // next(error)
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "manformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).send({ error: error.message });
+  }
+
+  next(error);
 };
 
 app.use(errorHandler);
